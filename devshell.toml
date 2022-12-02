@@ -1,0 +1,145 @@
+# https://numtide.github.io/devshell
+[devshell]
+name = "Advent of Code 2022"
+
+packages = [
+  # Docker and K8s packages.
+  "go_1_19",
+  "beam.packages.erlangR25.elixir_1_14",
+  "cargo",
+]
+
+[[commands]]
+name = "run"
+help = "runs a given language and day"
+category = "run"
+command = """
+if [ $# -eq 2 ]
+then
+  case $1 in
+    "go")
+    echo "Running go day $2"
+    cd $2/in_go
+    go run main.go
+    ;;
+
+    "rust")
+    echo "Running rust day $2"
+    cd $2/in_rust
+    cargo run
+    ;;
+
+    "elixir")
+    echo "Running elixir day $2"
+    cd $2/in_elixir
+    elixir -r lib/in_elixir.ex -e InElixir.run
+    ;;
+
+    *)
+      echo "Idk what you were expecting..."
+    ;;
+
+  esac
+
+  cd $PRJ_ROOT
+else
+  echo "Please run with a language and day..."
+  echo "Example:"
+  echo "$ run go 01"
+fi
+"""
+
+[[commands]]
+name = "tests"
+help = "test everything, or specify a day and language"
+category = "testing"
+command = """
+test.go
+test.rust
+test.elixir
+"""
+
+[[commands]]
+name = "test.day"
+help = "tests a given day or defaults to today"
+category = "testing"
+command = """
+if [ $# -eq 0 ]
+then
+  today=$(date '+%d')
+  echo "Testing for day: $today"
+  test.go $today
+  test.rust $today
+  test.elixir $today
+else
+  test.go $@
+  test.rust $@
+  test.elixir $@
+fi
+"""
+
+[[commands]]
+name = "test.go"
+help = "test all go files"
+category = "testing"
+command = """
+echo ""
+echo "🐹 Running Golang Tests"
+echo ""
+if [ $# -eq 0 ]
+then
+  for day in {01..25}; do
+      cd $day/in_go
+      go test
+      cd $PRJ_ROOT
+  done
+else
+  cd $@/in_go
+  go test
+  cd $PRJ_ROOT
+fi
+"""
+
+[[commands]]
+name = "test.rust"
+help = "test all rust files"
+category = "testing"
+command = """
+echo ""
+echo "🦀 Running Rust Tests"
+echo ""
+if [ $# -eq 0 ]
+then
+  for day in {01..25}; do
+      cd $day/in_rust
+      cargo test
+      cd $PRJ_ROOT
+  done
+else
+  cd $@/in_rust
+  cargo test
+  cd $PRJ_ROOT
+fi
+"""
+
+[[commands]]
+name = "test.elixir"
+help = "test all elixir files"
+category = "testing"
+command = """
+echo ""
+echo "⚗ Running Elixir Tests"
+echo ""
+if [ $# -eq 0 ]
+then
+  for day in {01..25}; do
+      cd $day/in_elixir
+      mix test
+      cd $PRJ_ROOT
+  done
+else
+  cd $@/in_elixir
+  mix test
+  cd $PRJ_ROOT
+fi
+"""
